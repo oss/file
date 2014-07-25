@@ -1,9 +1,9 @@
 # This is a test for an interesting Microsoft "feature"
-0			ulequad				0xffffffff		\bInteresting 
->&4			uleshort			0x00000000			
+0			ulequad				0xffffffff
+>&4			uleshort			0x00000000
 >>&8		uleshort			0x00000000			
 >>&12		uleshort			0x00000000			
 >>>&16		uleshort			0x00000000			
 >>>>&20		uleshort			0x00000000			
 >>>>>&24	uleshort			0x00000000			
->>>>>>&28	uleshort			0x00000000 		\bMicrosoft Bug
+>>>>>>&28	uleshort			0x00000000 		\bInteresting Microsoft Bug

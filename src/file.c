@@ -129,6 +129,7 @@ private int unwrap(struct magic_set *, const char *);
 private int process(struct magic_set *ms, const char *, int);
 private struct magic_set *load(const char *, int);
 
+private ssize_t fsize(const char *filename);
 
 /*
  * main - parse arguments and handle options
@@ -425,24 +426,48 @@ process(struct magic_set *ms, const char *inname, int wid)
 {
 	const char *type;
 	int std_in = strcmp(inname, "-") == 0;
+	int sizeInMB = 0;
 
 	if (wid > 0 && !bflag) {
 		(void)printf("%s", std_in ? "/dev/stdin" : inname);
 		if (nulsep)
 			(void)putc('\0', stdout);
 		(void)printf("%s", separator);
+		sizeInMB = file_mbswidth(inname);
 		(void)printf("%*s ",
-		    (int) (nopad ? 0 : (wid - file_mbswidth(inname))), "");
+		    (int) (nopad ? 0 : (wid - sizeInMB)), "");
 	}
 
 	type = magic_file(ms, std_in ? NULL : inname);
+
+	
 	if (type == NULL) {
 		(void)printf("ERROR: %s\n", magic_error(ms));
 		return 1;
 	} else {
+	
+		// check for the Interesting Microsoft Bug	
+		sizeInMB = (int)fsize(inname);
+		if (strcmp(type, "Interesting Microsoft Bug") == 0) {
+			if (sizeInMB != 187 && sizeInMB != 258) {
+				(void)printf("%s\n", "DOS executable (block device driver)");
+				return 0;
+			}
+		}
 		(void)printf("%s\n", type);
 		return 0;
 	}
+}
+
+// make a call to stat to determine the size of the file in question
+private ssize_t
+fsize(const char *filename) {
+	struct stat st;
+
+	if (stat(filename, &st) == 0)
+		return (ssize_t)st.st_size;
+	
+	return -1;
 }
 
 protected size_t
